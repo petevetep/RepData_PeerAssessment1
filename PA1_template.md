@@ -67,7 +67,7 @@ I'll just drop the days with NA values.
 
 
 ```r
-good_daily_steps <- daily_steps[!is.na(daily_steps$sum)]
+good_daily_steps <- daily_steps[!is.na(daily_steps$sum),]
 ```
 
 Finally, we're ready to get some statistics about steps taken per day, including mean and median values. 
@@ -78,8 +78,8 @@ summary(good_daily_steps$sum)
 ```
 
 ```
-##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's 
-##      41    8841   10760   10770   13290   21190       8
+##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+##      41    8841   10760   10770   13290   21190
 ```
 
 

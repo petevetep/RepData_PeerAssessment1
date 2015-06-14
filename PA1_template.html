@@ -248,7 +248,7 @@ Most of the days the number of step was between 10000 and 15000.</p>
 
 <p>I&#39;ll just drop the days with NA values.</p>
 
-<pre><code class="r">good_daily_steps &lt;- daily_steps[!is.na(daily_steps$sum)]
+<pre><code class="r">good_daily_steps &lt;- daily_steps[!is.na(daily_steps$sum),]
 </code></pre>
 
 <p>Finally, we&#39;re ready to get some statistics about steps taken per day, including mean and median values. </p>
@@ -256,8 +256,8 @@ Most of the days the number of step was between 10000 and 15000.</p>
 <pre><code class="r">summary(good_daily_steps$sum)
 </code></pre>
 
-<pre><code>##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA&#39;s 
-##      41    8841   10760   10770   13290   21190       8
+<pre><code>##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+##      41    8841   10760   10770   13290   21190
 </code></pre>
 
 <p>Mean is a little bit more than 10000 steps. </p>

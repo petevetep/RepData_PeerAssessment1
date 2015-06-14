@@ -46,7 +46,7 @@ summary(daily_steps$sum)
 I'll just drop the days with NA values.
 
 ```{r}
-good_daily_steps <- daily_steps[!is.na(daily_steps$sum)]
+good_daily_steps <- daily_steps[!is.na(daily_steps$sum),]
 ```
 
 Finally, we're ready to get some statistics about steps taken per day, including mean and median values. 
