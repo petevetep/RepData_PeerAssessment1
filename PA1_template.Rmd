@@ -4,28 +4,48 @@ output:
   html_document:
     keep_md: true
 ---
-
+# Stepping activity research
 
 ## Loading and preprocessing the data
+The source data could be read from the activity.zip file provided it is in the current directory
+
 ```{r}
 data <- read.csv(unzip("activity.zip"))
 ```
 
-It is a simple data frame with date, steps and interval variables. 
+It is a simple data frame with **date**, **steps** and **interval** variables. 
 
 ```{r}
 str(data)
 ```
+
+**steps** variable means number of steps made by a subject within an **interval** on the **date**. 
+
+Here **date** is a factor, and **interval** is an number that means hour*100 + minute when the interval starts. I.e interval = 2215 means interval that starts on 22:15 and longs 5 minutes. So there are no intervals that end with 60, 65, 70, and so on until 95. Look at the sample. 
+
+```{r}
+rnd_offset <- floor(runif(1)*(length(data$interval)-12)) 
+data[rnd_offset:(rnd_offset+12),]
+```
+
+I'm going to help future work by enumerating intervals
+
+```{r}
+data$interval_id <- as.numeric(as.factor(data$interval))
+head(data)
+```
+
 
 ## What is mean total number of steps taken per day?
 
 Now I will group the dataframe by date
 
 ```{r}
+library(dplyr)
 g <- group_by(data, date)
 ```
 
-Here I save the intermediate result into the object *g*. Now I'm ready to extract useful values.
+Here I save the intermediate result into the temporary object *g*. Now I'm ready to extract useful values.
 
 ```{r}
 daily_steps <- summarise(g, sum=sum(steps))
@@ -35,21 +55,23 @@ Let's look to the total number of steps taken per day
 ```{r}
 hist(daily_steps$sum)
 ```
-Most of the days the number of step was between 10000 and 15000.
 
-I have a kind of problem with NA values.
+
+So, most of the days the number of steps was between 10000 and 15000.
+
+But I have a kind of problem with NA values.
 ```{r}
 summary(daily_steps$sum)
 ```
 
 
-I'll just drop the days with NA values.
+I'll just drop records with NA values.
 
 ```{r}
 good_daily_steps <- daily_steps[!is.na(daily_steps$sum),]
 ```
 
-Finally, we're ready to get some statistics about steps taken per day, including mean and median values. 
+Finally, I'm ready to get some preliminary statistics about steps taken per day, including mean and median values. 
 
 ```{r}
 summary(good_daily_steps$sum)
@@ -65,10 +87,64 @@ Done.
 
 ## What is the average daily activity pattern?
 
+To get the answer I'll need to find the average of all steps made in the each interval on every day of the trial. I also need to skip NA values.
 
+```{r}
+g <- group_by(data,interval_id)
+avg_activity <- summarise(g,avgsteps=mean(steps,na.rm=TRUE))
+```
+
+
+Let's take a look.
+
+```{r}
+plot (avg_activity$interval_id,avg_activity$avgsteps,type="l",col="red")
+```
+
+Here it is. 
+Maximum value is 
+
+```{r}
+M <- max(avg_activity$avgsteps)
+print(M)
+```
+
+That corresponds to interval_id below
+
+```{r}
+M_x <- avg_activity[avg_activity$avgsteps == M,]$interval_id
+print(M_x)
+```
+
+And it consequently corresponds to the interval below
+
+```{r}
+data[data$interval_id==M_x,]$interval[1]
+```
+
+That is a 8:35 am.
 
 ## Imputing missing values
+
+Let's substitute all NA values with corresponding interval average values.
+
+```{r}
+patched_data <- data
+na_indices <- is.na(patched_data$steps)
+patched_data[na_indices,]$steps <- 
+  avg_activity$avgsteps[patched_data[na_indices,]$interval_id]
+head(patched_data)
+```
 
 
 
 ## Are there differences in activity patterns between weekdays and weekends?
+
+Ok, let's translate dates into weekdays.
+First of all, let's group by date again.
+
+```{r}
+patched_data$date1 <- strptime(as.character(patched_data$date),"%Y-%m-%d")
+
+```
+
